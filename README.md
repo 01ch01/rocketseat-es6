@@ -1,7 +1,9 @@
 # rocketseat-es6
+
 Desafios propostos de JS ES6+ na plataforma da Rocketseat Starter
 
 ## Run via Yarn
+
 `yarn init`
 
 `yarn add @babel/cli`
