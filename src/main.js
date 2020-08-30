@@ -1,8 +1,11 @@
+import api from './api';
+
 class App {
   constructor() {
     this.repositories = [];
 
     this.formEl = document.getElementById('repo-form');
+    this.inputEl = document.querySelector('input[name=repository]');
     this.listEl = document.getElementById('repo-list');
 
     this.registerHandlers();
@@ -12,23 +15,62 @@ class App {
     this.formEl.onsubmit = (event) => this.addRepository(event);
   }
 
-  addRepository(event) {
+  setLoading(loading = true) {
+    if (loading === true) {
+      let loadingEl = document.createElement('span');
+      loadingEl.appendChild(document.createTextNode('Loading...'));
+      loadingEl.setAttribute('id', 'loading');
+
+      this.formEl.appendChild(loadingEl);
+    } else {
+      document.getElementById('loading').remove();
+    }
+  }
+
+  async addRepository(event) {
     event.preventDefault();
 
-    this.repositories.push({
-      name: 'unform',
-      description: 'Easy peasy highly scalable ReactJS & React Native forms!',
-      avatar_url: 'https://avatars0.githubusercontent.com/u/28929274?s=200&v=4',
-      html_url: 'https://github.com/Rocketseat/unform',
-    });
+    const repoInput = this.inputEl.value;
 
-    this.render();
+    if (repoInput.length === 0) {
+      this.listEl.innerHTML = 'Please insert a valid public repository';
+      return;
+    }
+
+    this.setLoading();
+
+    try {
+      const response = await api.get(`/repos/${repoInput}`);
+
+      const {
+        name,
+        description,
+        owner: { avatar_url },
+        html_url,
+      } = response.data;
+
+      this.repositories.push({
+        name,
+        description,
+        avatar_url,
+        html_url,
+      });
+
+      this.inputEl.value = '';
+
+      this.render();
+    } catch (error) {
+      console.log(error);
+      console.log('hello');
+    }
+
+    this.setLoading(false);
   }
 
   render() {
     this.listEl.innerHTML = '';
 
-    this.repos.forEach((repo) => {
+    this.repositories.forEach((repo) => {
       let imgEl = document.createElement('img');
       imgEl.setAttribute('src', repo.avatar_url);
 
@@ -55,4 +97,3 @@ class App {
 }
 
 new App();
-
